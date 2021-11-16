@@ -14,7 +14,7 @@ function create() {
 	window.addEventListener("deviceorientation", handleOrientation.bind(this), true);
 
 	// Player
-	this.player = this.physics.add.image(config.width / 2, config.height / 2, 'player').setScale(0.25, 0.25);
+	this.player = this.physics.add.image(50, 50, 'player').setScale(0.15, 0.15);
 	this.player.setBounce(0.7, 0.7);
 	this.player.setCollideWorldBounds(true);
 
@@ -24,16 +24,25 @@ function create() {
 		{x: 0, y: 250, width: 50, height: 500},
 		{x: 250, y: 0, width: 500, height: 50},
 		{x: 500, y: 250, width: 50, height: 500},
-		{x: 500, y: 250, width: 50, height: 500},
+		{x: 100, y: 150, width: 50, height: 300},
+		{x: 300, y: 300, width: 50, height: 300},
 	]
     this.wallGroup = this.physics.add.staticGroup();
 	for (let wallSetting of wallSettings) {
 		let wall = this.add.rectangle(wallSetting.x, wallSetting.y, wallSetting.width, wallSetting.height, 0x6666ff);
 		this.wallGroup.add(wall);
 	}
+	
+	// Goal
+	this.goal = this.add.circle(400, 300, 50, 0xffaa66);
 
 	// Collisions
     this.physics.add.collider(this.player, this.wallGroup);
+    this.physics.add.overlap(this.player, this.goal, handleGoalOverlapping);
+}
+
+function handleGoalOverlapping() {
+	this.add.text(config.width / 2, config.height / 2, 'Yeeeeeeeee', { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
 }
 
 function handleOrientation(e) {
