@@ -1,44 +1,79 @@
 function preload() {
-    this.load.image('player', 'assets/repl.png');
+	this.load.image('player', 'assets/repl.png');
 }
 
 function create() {
-    this.w = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
-    this.a = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
-    this.s = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
-    this.d = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
-    this.cursors = this.input.keyboard.createCursorKeys();
+	// Register keys
+	this.w = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
+	this.a = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
+	this.s = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
+	this.d = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+	this.cursors = this.input.keyboard.createCursorKeys();
 
-    this.player = this.physics.add.image(config.width / 2, config.height / 2, 'player').setScale(0.25, 0.25);
-    this.player.setCollideWorldBounds(true);
+	// Special keybindings
+	window.addEventListener("deviceorientation", handleOrientation.bind(this), true);
+
+	// Player
+	this.player = this.physics.add.image(config.width / 2, config.height / 2, 'player').setScale(0.25, 0.25);
+	this.player.setBounce(0.7, 0.7);
+	this.player.setCollideWorldBounds(true);
+
+	// Walls
+	let wallSettings = [
+		{x: 250, y: 400, width: 500, height: 50},
+		{x: 0, y: 250, width: 50, height: 500},
+		{x: 250, y: 0, width: 500, height: 50},
+		{x: 500, y: 250, width: 50, height: 500},
+		{x: 500, y: 250, width: 50, height: 500},
+	]
+    this.wallGroup = this.physics.add.staticGroup();
+	for (let wallSetting of wallSettings) {
+		let wall = this.add.rectangle(wallSetting.x, wallSetting.y, wallSetting.width, wallSetting.height, 0x6666ff);
+		this.wallGroup.add(wall);
+	}
+
+	// Collisions
+    this.physics.add.collider(this.player, this.wallGroup);
+}
+
+function handleOrientation(e) {
+    var x = e.gamma;
+    var y = e.beta;
+    this.player.setVelocityX(this.player.body.velocity.x + x);
+    this.player.setVelocityY(this.player.body.velocity.y + y);
 }
 
 function update() {
-    if ((this.cursors.left.isDown || this.a.isDown) || (this.cursors.right.isDown || this.d.isDown)) this.player.setVelocityX(this.cursors.left.isDown || this.a.isDown ? -160 : 160);
-    else this.player.setVelocityX(0);
-    if ((this.cursors.up.isDown || this.w.isDown) || (this.cursors.down.isDown || this.s.isDown)) this.player.setVelocityY(this.cursors.up.isDown || this.w.isDown ? -160 : 160);
-    else this.player.setVelocityY(0);
+	if ((this.cursors.left.isDown || this.a.isDown) || (this.cursors.right.isDown || this.d.isDown)) {
+		this.player.setVelocityX(this.cursors.left.isDown || this.a.isDown ? -160 : 160);
+	}
+	else {
+		this.player.setVelocityX(0);
+	}
+	if (this.w.isDown && this.player.body.touching.down) {
+		this.player.setVelocityY(-500)
+	}
 }
 
 const config = {
-    type: Phaser.AUTO,
-    width: 500,
-    height: 400,
-    backgroundColor: '#f9f9f9',
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: {
-                y: 0
-            },
-            debug: false
-        }
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
+	type: Phaser.AUTO,
+	width: 500,
+	height: 400,
+	backgroundColor: '#f9f9f9',
+	physics: {
+		default: 'arcade',
+		arcade: {
+			gravity: {
+				y: 1500
+			},
+			debug: false
+		}
+	},
+	scene: {
+		preload: preload,
+		create: create,
+		update: update
+	}
 };
 
 const game = new Phaser.Game(config);
